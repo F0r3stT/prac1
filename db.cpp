@@ -391,7 +391,7 @@ string Database::executeQuery(string queryStr) {
         if (!t) 
             return "Ошибка: Дерево " + name + " не найдено";
         
-        string check = t->getNodeInfo(valInt);
+        string check = t->getInfo(valInt);
         if (check == "Элемент не найден" || check == "Дерево пустое") {
             return "Ошибка: Элемент не найден";
         }
@@ -410,7 +410,7 @@ string Database::executeQuery(string queryStr) {
         CompleteBinaryTree* t = findTree(name);
         if (!t) return "Ошибка: Дерево " + name + " не найдено";
         
-        return t->getNodeInfo(valInt);
+        return t->getInfo(valInt);
     }
     
     return "Неизвестная команда";

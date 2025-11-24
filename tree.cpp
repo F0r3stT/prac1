@@ -103,7 +103,7 @@ void CompleteBinaryTree::remove(int value) {
 }
 
 //Чтение
-string CompleteBinaryTree::getNodeInfo(int value) {
+string CompleteBinaryTree::getInfo(int value) {
     if (root == nullptr) 
         return "Дерево пустое";
     

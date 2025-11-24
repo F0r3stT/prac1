@@ -32,7 +32,7 @@ public:
 
     void insert(int value);
     void remove(int value);
-    string getNodeInfo(int value);
+    string getInfo(int value);
     void saveToFile(ofstream& fileStream, const string& name);
 };
 
