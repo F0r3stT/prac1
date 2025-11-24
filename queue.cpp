@@ -6,7 +6,6 @@ Queue::Queue() {
 }
 
 //для создания новой очереди из старой
-
 Queue::Queue(const Queue& other) {
     this->frontNode = nullptr;
     this->rearNode = nullptr;

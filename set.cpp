@@ -21,6 +21,7 @@ Set::Set(int size)
     }
 }
 
+//деструктор освобождает всю динамическую память
 Set::~Set()
 {
     for(int i=0; i< capac; i++)
@@ -37,6 +38,7 @@ Set::~Set()
 }
 
 
+//расширение таблицы    
 void Set::resize() {
     int newCapacity = capac * 2;
 
@@ -53,7 +55,7 @@ void Set::resize() {
 
             int newIdx = hashFunc(curr->key, newCapacity);
             
-            //Вставляем в голову списка нового бакета
+            //вставляем в голову списка нового бакета
             curr->next = newBuckets[newIdx];
             newBuckets[newIdx] = curr;
 
@@ -69,10 +71,11 @@ void Set::resize() {
     capac = newCapacity;
 }
 
+//добавление элемента
 void Set::add(string key) {
     if (isMember(key)) return;
 
-    if ((double)count / capac >= 0.7) {
+    if ((double)count / capac >= 0.7) { //коэффициент загрузки
         resize();
     }
 
@@ -82,8 +85,9 @@ void Set::add(string key) {
     count++;
 }
 
+//удаление элемента
 string Set::remove(string key) {
-    int idx = hashFunc(key, capac);
+    int idx = hashFunc(key, capac); 
     SetNode* curr = buckets[idx];
     SetNode* prev = nullptr;
 
@@ -103,11 +107,13 @@ string Set::remove(string key) {
     return "ОШИБКА: Элемент не найден";
 }
 
+//проверяем принадлжеит ли множество
 bool Set::isMember(string key) const {
     int idx = hashFunc(key, capac);
     SetNode* curr = buckets[idx];
     while (curr != nullptr) {
-        if (curr->key == key) return true;
+        if (curr->key == key) 
+            return true;
         curr = curr->next;
     }
     return false;

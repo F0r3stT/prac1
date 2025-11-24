@@ -1,16 +1,37 @@
 #include "db.h"
 
+
+//функция для прверки является ли строка числом
+bool isInteger(string& s) {
+    if (s.empty())//пустота
+        return false;
+    size_t i = 0;
+    if (s[0] == '-' || s[0] == '+') { //если строка только из знака
+        i = 1; //пропуск знака
+        if (s.length() == 1) 
+            return false; 
+    }
+    for (; i < s.length(); ++i) {
+        if (s[i] < '0' || s[i] > '9') //48-57 ascii
+            return false;
+    }
+    return true;
+}
+
+//конструктор
 Database::Database() {
     stackHead = nullptr;
     queueHead = nullptr;
     setHead = nullptr;
     hashHead = nullptr;
+    treeHead = nullptr;
 }
 
 Database::~Database() {
     cleanup();
 }
 
+//удаляет все объекты
 void Database::cleanup() {
     while (stackHead) {
         NamedStack* temp = stackHead;
@@ -36,13 +57,19 @@ void Database::cleanup() {
         delete temp->ht;
         delete temp;
     }
+    while (treeHead) {
+        NamedTree* temp = treeHead;
+        treeHead = treeHead->next;
+        delete temp->tree;
+        delete temp;
+    }
 }
 
-// Убрана функция getStructureType
-
-Stack* Database::getOrCreateStack(string name) {
-    Stack* existing = findStack(name);
-    if(existing) return existing;
+//создаём новую структуру 
+Stack* Database::getCreateStack(string name) {
+    Stack* exis = findStack(name);
+    if(exis) 
+        return exis;
 
     NamedStack* newNode = new NamedStack;
     newNode->name = name;
@@ -52,9 +79,10 @@ Stack* Database::getOrCreateStack(string name) {
     return newNode->stack;
 }
 
-Queue* Database::getOrCreateQueue(string name) {
+Queue* Database::getCreateQueue(string name) {
     Queue* existing = findQueue(name);
-    if(existing) return existing;
+    if(existing) 
+        return existing;
 
     NamedQueue* newNode = new NamedQueue;
     newNode->name = name;
@@ -64,9 +92,10 @@ Queue* Database::getOrCreateQueue(string name) {
     return newNode->queue;
 }
 
-Set* Database::getOrCreateSet(string name) {
+Set* Database::getCreateSet(string name) {
     Set* existing = findSet(name);
-    if(existing) return existing;
+    if(existing) 
+        return existing;
 
     NamedSet* newNode = new NamedSet;
     newNode->name = name;
@@ -76,9 +105,10 @@ Set* Database::getOrCreateSet(string name) {
     return newNode->set;
 }
 
-HashTable* Database::getOrCreateHash(string name) {
+HashTable* Database::getCreateHash(string name) {
     HashTable* existing = findHash(name);
-    if(existing) return existing;
+    if(existing) 
+        return existing;
 
     NamedHash* newNode = new NamedHash;
     newNode->name = name;
@@ -88,10 +118,24 @@ HashTable* Database::getOrCreateHash(string name) {
     return newNode->ht;
 }
 
+CompleteBinaryTree* Database::getCreateTree(string name) {
+    CompleteBinaryTree* existing = findTree(name);
+    if(existing) 
+        return existing;
+
+    NamedTree* newNode = new NamedTree;
+    newNode->name = name;
+    newNode->tree = new CompleteBinaryTree();
+    newNode->next = treeHead;
+    treeHead = newNode;
+    return newNode->tree;
+}
+
 Stack* Database::findStack(string name) {
     NamedStack* curr = stackHead;
     while(curr) { 
-        if(curr->name == name) return curr->stack; 
+        if(curr->name == name) 
+            return curr->stack; 
         curr = curr->next; 
     }
     return nullptr;
@@ -99,7 +143,8 @@ Stack* Database::findStack(string name) {
 Queue* Database::findQueue(string name) {
     NamedQueue* curr = queueHead;
     while(curr) { 
-        if(curr->name == name) return curr->queue; 
+        if(curr->name == name) 
+            return curr->queue; 
         curr = curr->next; 
     }
     return nullptr;
@@ -107,7 +152,8 @@ Queue* Database::findQueue(string name) {
 Set* Database::findSet(string name) {
     NamedSet* curr = setHead;
     while(curr) { 
-        if(curr->name == name) return curr->set; 
+        if(curr->name == name)
+            return curr->set; 
         curr = curr->next; 
     }
     return nullptr;
@@ -115,7 +161,16 @@ Set* Database::findSet(string name) {
 HashTable* Database::findHash(string name) {
     NamedHash* curr = hashHead;
     while(curr) { 
-        if(curr->name == name) return curr->ht; 
+        if(curr->name == name) 
+            return curr->ht; 
+        curr = curr->next; 
+    }
+    return nullptr;
+}
+CompleteBinaryTree* Database::findTree(string name) {
+    NamedTree* curr = treeHead;
+    while(curr) { 
+        if(curr->name == name) return curr->tree; 
         curr = curr->next; 
     }
     return nullptr;
@@ -126,20 +181,30 @@ void Database::loadData(const string& path) {
     if (!file.is_open()) return;
 
     string type, name, key, val;
-    while (file >> type >> name >> key) {
+    
+    while (file >> type) {
         if (type == "STACK") {
-            Stack* s = getOrCreateStack(name);
+            file >> name >> key;
+            Stack* s = getCreateStack(name);
             s->push(key);
         } else if (type == "QUEUE") {
-            Queue* q = getOrCreateQueue(name);
+            file >> name >> key;
+            Queue* q = getCreateQueue(name);
             q->push(key);
         } else if (type == "SET") {
-            Set* s = getOrCreateSet(name);
+            file >> name >> key;
+            Set* s = getCreateSet(name);
             s->add(key);
         } else if (type == "HASH") {
-            file >> val; 
-            HashTable* h = getOrCreateHash(name);
+            file >> name >> key >> val;
+            HashTable* h = getCreateHash(name);
             h->set(key, val);
+        } else if (type == "TREE") {
+            file >> name >> key;
+            if (isInteger(key)) {
+                CompleteBinaryTree* t = getCreateTree(name);
+                t->insert(stoi(key));
+            }
         }
     }
     file.close();
@@ -175,6 +240,12 @@ void Database::saveData(const string& path) {
         hNode->ht->saveToFile(file, hNode->name); 
         hNode = hNode->next;
     }
+    
+    NamedTree* tNode = treeHead;
+    while (tNode) {
+        tNode->tree->saveToFile(file, tNode->name);
+        tNode = tNode->next;
+    }
 
     file.close();
 }
@@ -184,16 +255,23 @@ void Database::parseQuery(const string& qStr, string& cmd, string& name, string&
     int idx = 0;
     int len = qStr.length();
 
-    auto skipSpaces = [&](int& i) { while(i < len && (qStr[i] == ' ' || qStr[i] == '\t')) i++; };
+    //перепрыгиваем через пробелы [&] захват переменных по ссылке
+    auto skipSpaces = [&](int& i) 
+    { 
+    while(i < len && (qStr[i] == ' ' || qStr[i] == '\t')) 
+        i++; 
+    };
+
     auto readWord = [&](int& i) -> string {
         string res = "";
-        while(i < len && qStr[i] != ' ' && qStr[i] != '\t') {
+        while(i < len && qStr[i] != ' ' && qStr[i] != '\t') 
+        {
             res += qStr[i++];
         }
         return res;
     };
 
-    skipSpaces(idx);
+    skipSpaces(idx); //все пробелы в начале строки пропускаем
     cmd = readWord(idx);
     skipSpaces(idx);
     name = readWord(idx);
@@ -209,99 +287,131 @@ string Database::executeQuery(string queryStr) {
 
     if (cmd == "") 
         return "";
+    if (name == "")
+        return "Ошибка: Не указано имя структуры";
 
-    // Проверка на имя структуры
-    if (name == "") {
-        return "ОШИБКА: Не указано имя структуры";
-    }
-
-    // --- STACK ---
     if (cmd == "SPUSH") {
-        if (key == "") return "ОШИБКА: Не указано значение для добавления";
-        
-        Stack* s = getOrCreateStack(name);
+        if (key == "") 
+            return "Ошибка: Не указано значение для добавления";
+        Stack* s = getCreateStack(name);
         s->push(key);
         return key;
     }
     if (cmd == "SPOP") {
         Stack* s = findStack(name);
-        if (!s) {
-            return "ОШИБКА: Стек '" + name + "' не найден";
-        }
+        if (!s) 
+            return "Ошибка: Стек " + name + " не найден";
         return s->pop(); 
     }
 
     if (cmd == "QPUSH") {
-        if (key == "") return "ОШИБКА: Не указано значение для добавления";
-
-        Queue* q = getOrCreateQueue(name);
+        if (key == "") 
+            return "Ошибка: Не указано значение для добавления";
+        Queue* q = getCreateQueue(name);
         q->push(key);
         return key;
     }
     if (cmd == "QPOP") {
         Queue* q = findQueue(name);
-        if (!q) {
-            return "ОШИБКА: Очередь '" + name + "' не найдена";
-        }
+        if (!q) 
+            return "Ошибка: Очередь'" + name + " не найдена";
         return q->pop(); 
     }
 
-    // --- SET ---
     if (cmd == "SADD") {
-        if (key == "") return "ОШИБКА: Не указан ключ для добавления";
-
-        Set* s = getOrCreateSet(name);
+        if (key == "") 
+            return "Ошибка: Не указан ключ для добавления";
+        Set* s = getCreateSet(name);
         s->add(key);
         return key;
     }
     if (cmd == "SREM") {
-        if (key == "") return "ОШИБКА: Не указан ключ для удаления";
-
+        if (key == "")
+            return "Ошибка: Не указан ключ для удаления";
         Set* s = findSet(name);
-        if (!s) {
-            return "ОШИБКА: Множество '" + name + "' не найдено";
-        }
+        if (!s) 
+            return "Ошибка: Множество " + name + " не найдено";
         return s->remove(key); 
     }
     if (cmd == "SISMEMBER") {
-        if (key == "") return "ОШИБКА: Не указан ключ для проверки";
-
+        if (key == "") 
+            return "Ошибка: Не указан ключ для проверки";
         Set* s = findSet(name);
-        if (!s) {
-             return "FALSE"; 
-        }
+        if (!s) 
+            return "FALSE"; 
         return s->isMember(key) ? "TRUE" : "FALSE";
     }
 
-    // --- HASH ---
     if (cmd == "HSET") {
         if (key == "") 
-            return "ОШИБКА: Не указан ключ";
+            return "Ошибка: Не указан ключ";
         if (val == "") 
-            return "ОШИБКА: Не указано значение";
-
-        HashTable* h = getOrCreateHash(name);
+            return "Ошибка: Не указано значение";
+        HashTable* h = getCreateHash(name);
         h->set(key, val);
         return key + "->" + val;
     }
     if (cmd == "HDEL") {
-        if (key == "") return "ОШИБКА: Не указан ключ для удаления";
-
+        if (key == "") 
+            return "Ошибка: Не указан ключ для удаления";
         HashTable* h = findHash(name);
-        if (!h) {
-            return "ОШИБКА: Хеш-таблица '" + name + "' не найдена";
-        }
+        if (!h) 
+            return "Ошибка: Хеш-таблица '" + name + "' не найдена";
         return h->remove(key);
     }
     if (cmd == "HGET") {
-        if (key == "") return "ОШИБКА: Не указан ключ для поиска";
-
+        if (key == "") 
+            return "Ошибка: Не указан ключ для поиска";
         HashTable* h = findHash(name);
-        if (!h) {
-            return "ОШИБКА: Хеш-таблица " + name + " не найдена";
-        }
+        if (!h) 
+            return "Ошибка: Хеш-таблица " + name + " не найдена";
         return h->get(key);
     }
 
-    return "ОШИБКА: Неизвестная команда '" + cmd + "'";
+    if (cmd == "TPUSH") {
+        if (key == "") 
+            return "Ошибка: Не указано значение для добавления ";
+        if (!isInteger(key)) 
+            return "Ошибка: Значение дерева должно быть числом";
+        
+        int valInt = stoi(key); //строка в число
+        CompleteBinaryTree* t = getCreateTree(name);
+        t->insert(valInt);
+        return key;
+    }
+    
+    if (cmd == "TDEL") {
+        if (key == "")
+            return "Ошибка: Не указано значение для удаления";
+        if (!isInteger(key)) 
+            return "Ошибка: Значение дерева должно быть числом";
+
+        int valInt = stoi(key);
+        CompleteBinaryTree* t = findTree(name);
+        if (!t) 
+            return "Ошибка: Дерево " + name + " не найдено";
+        
+        string check = t->getNodeInfo(valInt);
+        if (check == "Элемент не найден" || check == "Дерево пустое") {
+            return "Ошибка: Элемент не найден";
+        }
+        
+        t->remove(valInt);
+        return "Удалено: " + key;
+    }
+
+    if (cmd == "TSEARCH") {
+        if (key == "") 
+            return "Ошибка: Не указано значение для поиска";
+        if (!isInteger(key)) 
+            return "Ошибка: Значение дерева должно быть числом";
+
+        int valInt = stoi(key);
+        CompleteBinaryTree* t = findTree(name);
+        if (!t) return "Ошибка: Дерево " + name + " не найдено";
+        
+        return t->getNodeInfo(valInt);
+    }
+    
+    return "Неизвестная команда";
 }

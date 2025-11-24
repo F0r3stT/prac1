@@ -8,6 +8,7 @@
 #include "queue.h"
 #include "set.h"
 #include "hash.h"
+#include "tree.h"
 
 using namespace std;
 
@@ -41,22 +42,32 @@ private:
         NamedHash* next;
     };
 
+    class NamedTree {
+    public:
+        string name;
+        CompleteBinaryTree* tree;
+        NamedTree* next;
+    };
+
     NamedStack* stackHead;
     NamedQueue* queueHead;
     NamedSet* setHead;
     NamedHash* hashHead;
+    NamedTree* treeHead;
 
-    Stack* getOrCreateStack(string name);
-    Queue* getOrCreateQueue(string name);
-    Set* getOrCreateSet(string name);
-    HashTable* getOrCreateHash(string name);
+    //ищет по имени и создаёт новый
+    Stack* getCreateStack(string name);
+    Queue* getCreateQueue(string name);
+    Set* getCreateSet(string name);
+    HashTable* getCreateHash(string name);
+    CompleteBinaryTree* getCreateTree(string name);
 
+    //обычный поиск по имени
     Stack* findStack(string name);
     Queue* findQueue(string name);
     Set* findSet(string name);
     HashTable* findHash(string name);
-
-    string getStructureType(string name);
+    CompleteBinaryTree* findTree(string name);
 
     void parseQuery(const string& qStr, string& cmd, string& name, string& key, string& val);
     void cleanup();

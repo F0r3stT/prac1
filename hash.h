@@ -20,8 +20,8 @@ public:
 
 class HashChaining {
 private:
-    HashNode** buckets;
-    int capacity;
+    HashNode** buckets; //buckets[i] голова связного списка
+    int capacity; 
     int count;
 
     int hashFunc(const string& key, int cap) const;
@@ -35,7 +35,6 @@ public:
     string get(string key) const;
     string remove(string key); 
     
-    // Добавили аргумент name для корректного сохранения формата
     void saveToFile(ofstream& fileStream, const string& name) const;
 };
 
@@ -43,8 +42,8 @@ class HashEntry {
 public:
     string key;
     string value;
-    bool occupied;
-    bool deleted;
+    bool occupied; //слот занят
+    bool deleted; //удалён
 
     HashEntry() : occupied(false), deleted(false) {}
 };
