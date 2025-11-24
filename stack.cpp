@@ -17,7 +17,7 @@ void Stack::push(string value) {
 
 string Stack::pop() {
     if (isEmpty()) 
-        return "STACK IS EMPTY";
+        return "ОШИБКА: Стек пуст"; 
     
     StackNode* temp = this->topNode;
     string val = temp->value;
@@ -28,7 +28,7 @@ string Stack::pop() {
 }
 string Stack::peek() const {
     if (isEmpty()) 
-        return "STACK IS EMPTY";
+        return "ОШИБКА: Стек пуст";
     return this->topNode->value;
 }
 

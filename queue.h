@@ -21,6 +21,10 @@ private:
 
 public:
     Queue();
+
+
+    Queue(const Queue& other);            //конструктор копирования
+    Queue& operator=(const Queue& other); 
     ~Queue();
 
     void push(string value);

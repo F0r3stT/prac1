@@ -17,7 +17,7 @@ public:
 
 class Stack{
 private:
-    StackNode* topNode;
+    StackNode* topNode; //верхушка стека
 
 public:
     Stack();

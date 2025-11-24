@@ -40,7 +40,7 @@ Set::~Set()
 void Set::resize() {
     int newCapacity = capac * 2;
 
-    // 1. Создаем новый массив
+    //Создаем новый массив
     SetNode** newBuckets = new SetNode*[newCapacity];
     for (int i = 0; i < newCapacity; i++) {
         newBuckets[i] = nullptr;
@@ -53,7 +53,7 @@ void Set::resize() {
 
             int newIdx = hashFunc(curr->key, newCapacity);
             
-            // Вставляем в голову списка нового бакета
+            //Вставляем в голову списка нового бакета
             curr->next = newBuckets[newIdx];
             newBuckets[newIdx] = curr;
 
@@ -61,10 +61,10 @@ void Set::resize() {
         }
     }
 
-    // 3. Удаляем старый массив (сами узлы не удаляем, мы их переиспользовали)
+    //Удаляем старый массив 
     delete[] buckets;
 
-    // 4. Обновляем поля класса
+
     buckets = newBuckets;
     capac = newCapacity;
 }
@@ -100,7 +100,7 @@ string Set::remove(string key) {
         prev = curr;
         curr = curr->next;
     }
-    return "";
+    return "ОШИБКА: Элемент не найден";
 }
 
 bool Set::isMember(string key) const {
